@@ -15,6 +15,7 @@ const WORDS = [
 ];
 
 let numWrong = 0;
+let correctGuesses = 0;
 
 // Loop over the chars in `word` and create divs.
 //
@@ -43,14 +44,40 @@ const disableLetterButton = (buttonEl) => {
   buttonEl.disabled = true;
 };
 
+//helper function to disable all letter buttons 
+const disableAllLetterButtons = () => {
+  const buttons = document.querySelectorAll('button');
+  for (const button of buttons) {
+    button.disabled = true;
+  }
+}
+
 // Return `true` if `letter` is in the word.
 //
 const isLetterInWord = (letter) => document.querySelector(`div.${letter}`) !== null;
 
 // Called when `letter` is in word. Update contents of divs with `letter`.
 //
-const handleCorrectGuess = (letter) => {
-  // Replace this with your code
+const handleCorrectGuess = (letter, word) => {
+  // select all html elements with letter class
+  correctLetters = document.querySelectorAll(`.${letter}`);
+
+  //loop over each html element
+  for (let correctLetter of correctLetters) {
+    //update the blank to fill with the letter
+    correctLetter.innerHTML = letter;
+    //increase # of correct letters guessed
+    correctGuesses += 1;
+  }
+  //if user has guessed the word correctly
+  if (correctGuesses === word.length) {
+    disableAllLetterButtons();
+    //show congrats message
+    document.querySelector('#win').style.display = 'block'; 
+  }
+
+
+
 };
 
 //
@@ -62,7 +89,17 @@ const handleCorrectGuess = (letter) => {
 
 const handleWrongGuess = () => {
   numWrong += 1;
-  // Replace this with your code
+  const sharkPhoto = document.querySelector('img');
+  // if user gets to 5 wrong guesses
+  if (numWrong === 5) {
+    disableAllLetterButtons();
+    //unhide hidden play again message
+    document.querySelector('#play-again').style.display = ''; //'' unhides element
+  //otherwise  
+  }
+  //update image
+  sharkPhoto.setAttribute('src', `/static/images/guess${numWrong}.png`);
+    
 };
 
 //  Reset game state. Called before restarting the game.
@@ -73,17 +110,38 @@ const resetGame = () => {
 // This is like if __name__ == '__main__' in Python
 //
 (function startGame() {
-  // For now, we'll hardcode the word that the user has to guess.
-  const word = 'hello';
+  // choose a random word using random
+  const word = WORDS[Math.floor(Math.random() * WORDS.length)];
 
   createDivsForChars(word);
   generateLetterButtons();
 
   for (const button of document.querySelectorAll('button')) {
     // add an event handler to handle clicking on a letter button
-    // YOUR CODE HERE
+    button.addEventListener('click', () => {
+      //disable the letter button 
+      disableLetterButton(button);
+      let letter = button.innerHTML;
+      //if guess was correct 
+      if (isLetterInWord(letter)) {
+        //handleCorrectGuess
+        handleCorrectGuess(letter, word);
+      //otherwise   
+      } else {
+        //handleWrongGuess
+        handleWrongGuess(letter);
+      }
+    })
   }
 
   // add an event handler to handle clicking on the Play Again button
-  // YOUR CODE HERE
+  const playAgain = document.querySelector('#play-again');
+  playAgain.addEventListener('click', () => {
+    resetGame();
+  });
+
+  const winButton = document.querySelector('#win');
+  winButton.addEventListener('click', () => {
+    resetGame();
+  });
 })();
